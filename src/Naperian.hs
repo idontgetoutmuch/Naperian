@@ -258,6 +258,9 @@ instance Shapely fs => Applicative (Hyper fs) where
   pure  = hreplicate
   (<*>) = hzipWith ($)
 
+hlookup :: Hyper (f : fs) a -> Log f -> Hyper fs a
+hlookup (Prism x) i = fmap (flip lookup i) x
+
 hzipWith :: (a -> b -> c) -> Hyper fs a -> Hyper fs b -> Hyper fs c
 hzipWith f (Scalar a) (Scalar b) = Scalar (f a b)
 hzipWith f (Prism x)  (Prism y)  = Prism (hzipWith (azipWith f) x y)
@@ -270,6 +273,10 @@ first (Prism x)  = head (toList (first x))
 transposeH :: Hyper (f : (g : fs)) a
            -> Hyper (g : (f : fs)) a
 transposeH (Prism (Prism x)) = Prism (Prism (fmap transpose x))
+
+transposeH' :: Hyper (f : (g : (h : fs))) a
+            -> Hyper (f : (h : (g : fs))) a
+transposeH' (Prism (Prism (Prism x))) = Prism (Prism (Prism (fmap transpose x)))
 
 -- | Fold over a single dimension of a Hypercuboid.
 foldrH :: (a -> a -> a) -> a -> Hyper (f : fs) a -> Hyper fs a
